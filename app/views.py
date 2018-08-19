@@ -20,20 +20,25 @@ def home(request):
     return JsonResponse(dummy)
 
 
-
 class IssueView(View):
 
     def get(self, request):
+        """
+        get all the issues
+        """
         return HttpResponse('get issue')
     
     def post(self, request):
+        """
+        create issue
+        """
         if request.content_type == 'application/json':
             body_unicode = request.body.decode('utf-8')
             issue_req = json.loads(body_unicode)
             issue = Issue()
             issue.title = issue_req["title"]
             issue.description = issue_req["description"]
-            issue.author = User.objects.get(email="manigandan@sit.com")
+            issue.author = request.user
             issue.assignee_id = issue_req["assignee_id"]
             issue.status = issue_req["status"]
             issue.save()

@@ -45,6 +45,9 @@ INSTALLED_APPS = [
  
 
 MIDDLEWARE = [
+    # custom middleware
+    'app.middleware.auth.LoginRequiredMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
