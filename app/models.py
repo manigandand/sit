@@ -14,20 +14,30 @@ class User(models.Model):
     deleted_at = models.DateTimeField(blank=True, null=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
-    email = models.CharField(max_length=30)
+    email = models.CharField(max_length=30, unique=True)
     password = models.CharField(max_length=30)
-    dob = models.CharField(max_length=30)
     access_token = models.CharField(max_length=30)
+    date_of_birth = models.CharField(max_length=30)
     role = models.CharField(max_length=30)
-    status = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
-    def settime(self):
-        self.created_at = timezone.now()
-        self.updated_at = timezone.now()
-        self.save()
+    is_authenticated = True
+    is_anonymous = False
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['access_token', 'password']
 
-    def full_name(self):
-        return '%s %s'.format(self.first_name, self.last_name)
+    def get_full_name(self):
+        """
+        Returns the first_name plus the last_name, with a space in between.
+        """
+        full_name = '%s %s' % (self.first_name, self.last_name)
+        return full_name.strip()
+
+    def get_short_name(self):
+        '''
+        Returns the short name for the user.
+        '''
+        return self.first_name
 
 
 class Issue(models.Model):

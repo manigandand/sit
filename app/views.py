@@ -1,6 +1,10 @@
+import json
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.core import serializers
+from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate, login
+
+from app.models import User
 
 # Create your views here.
 
@@ -19,12 +23,16 @@ def home(request):
 def post_login(request):
     username = request.POST['username']
     password = request.POST['password']
-    print(username)
-    print(password)
 
-    user = authenticate(request, username=username, password=password)
+    user = User.objects.get(email=username, password=password)
     if user is not None:
-        login(request, user)
+        print("here")
+        data = serializers.serialize('json', [user])
+        struct = json.loads(data)
+        data = json.dumps(struct[0])
+        
+        return HttpResponse(data, content_type='application/json')
+        # return JsonResponse({"data": data}, safe=True)
     else:
         return JsonResponse(dummy)
     return JsonResponse({})

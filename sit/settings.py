@@ -79,12 +79,17 @@ WSGI_APPLICATION = 'sit.wsgi.application'
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    'default':{
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'issue_tracker',
+        'USER': 'jira',
+        'PASSWORD': 'Jira@1234',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
+AUTH_USER_MODEL = 'app.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
