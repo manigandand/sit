@@ -17,11 +17,19 @@ from django.contrib import admin
 from django.urls import path
 
 from app import views
+from app.views import IssueView, IssueDetailsView
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('login/', views.post_login, name='login'),
-    path('issue/', views.issue, name='issue'),
+    # get all issue GET
+    # create issue POST
+    path('issue/', IssueView.as_view(), name='issue'),
+    # get issue details by id GET
+    # update issue PATCH
+    # delete issue DELETE
+    path('issue/<int:issue_id>/', IssueDetailsView.as_view(), name='issue_by_id'),
+
 
     path('admin/', admin.site.urls),
 ]
