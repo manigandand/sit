@@ -1,5 +1,5 @@
 import json
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.core import serializers
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate, login
@@ -26,7 +26,9 @@ class IssueView(View):
         """
         get all the issues
         """
-        return HttpResponse('get issue')
+        issue_list = Issue.objects.order_by('-created_at')
+        return HttpResponse(serialize_object(issue_list, False), content_type='application/json')
+        
     
     def post(self, request):
         """
@@ -43,7 +45,7 @@ class IssueView(View):
             issue.status = issue_req["status"]
             issue.save()
 
-            return HttpResponse(serialize_object(issue), content_type='application/json')
+            return HttpResponse(serialize_object(issue, True), content_type='application/json')
 
         return HttpResponse('post issue')
 
@@ -51,7 +53,15 @@ class IssueDetailsView(View):
 
     def get(self, request, **kwargs):
         issue_id = self.kwargs['issue_id']
-        return HttpResponse('get issue, %d'.format(issue_id))
+        # issue = get_object_or_404(Issue, pk=issue_id)
+
+        try:
+           issue = Issue.objects.get(pk=issue_id)
+        except (KeyError, Issue.DoesNotExist):
+            return HttpResponse('404 Issue Not found', status=404)
+
+        return HttpResponse(serialize_object(issue, True), content_type='application/json')
+
     
     def patch(self, request, issue_id):
         issue_id = self.kwargs['issue_id']
@@ -59,8 +69,14 @@ class IssueDetailsView(View):
 
     def delete(self, request, issue_id):
         issue_id = self.kwargs['issue_id']
-        return HttpResponse('delete issue, %d'.format(issue_id))
+        try:
+           issue = Issue.objects.get(pk=issue_id)
+        except (KeyError, Issue.DoesNotExist):
+            return HttpResponse('404 Issue Not found', status=404)
+        # delete
+        issue.delete()
 
+        return HttpResponse('204 No Content', status=204)
 
 def post_login(request):
     username = request.POST['username']
@@ -68,19 +84,20 @@ def post_login(request):
 
     user = User.objects.get(email=username, password=password)
     if user is not None:
-        print("here")
-        data = serializers.serialize('json', [user])
-        struct = json.loads(data)
-        data = json.dumps(struct[0])
-        
-        return HttpResponse(data, content_type='application/json')
-        # return JsonResponse({"data": data}, safe=True)
+        return HttpResponse(serialize_object(user, True), content_type='application/json')
     else:
         return JsonResponse(dummy)
     return JsonResponse({})
 
 
-def serialize_object(issue):
-    data = serializers.serialize('json', [issue])
-    struct = json.loads(data)
-    return json.dumps(struct[0])
+def serialize_object(obj, is_first_obj):
+    if is_first_obj:
+        data = serializers.serialize('json', [obj])
+        struct = json.loads(data)
+        data = json.dumps(struct[0])
+    else:
+        data = serializers.serialize('json', obj)
+        struct = json.loads(data)
+        data = json.dumps(struct)
+
+    return data
